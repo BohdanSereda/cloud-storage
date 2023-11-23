@@ -10,7 +10,6 @@ import {UserService} from "src/user/user.service";
 import * as bcrypt from "bcryptjs";
 import {User} from "src/user/entities";
 import {ConfigService} from "@nestjs/config";
-import * as argon2 from "argon2";
 
 @Injectable()
 export class AuthService {
@@ -46,18 +45,21 @@ export class AuthService {
   }
   private async activateUser(createUserDto: CreateUserDto) {
     const user = await this.userService.getByEmail(createUserDto.email);
-    const passwordEquals = await bcrypt.compare(
-      createUserDto.password,
-      user.password
-    );
-    if (user && passwordEquals) {
+    let passwordEquals = false;
+    if (user) {
+      passwordEquals = await bcrypt.compare(
+        createUserDto.password,
+        user.password
+      );
+    }
+    if (passwordEquals) {
       return user;
     }
     throw new UnauthorizedException({message: "Wrong email or password"});
   }
 
   private hashData(data: string) {
-    return argon2.hash(data);
+    return bcrypt.hash(data, 5);
   }
   private async updateRefreshToken(userId: string, refreshToken: string) {
     const hashedRefreshToken = await this.hashData(refreshToken);
@@ -70,9 +72,9 @@ export class AuthService {
     const user = await this.userService.getById(userId);
     if (!user || !user.refreshToken)
       throw new ForbiddenException("Access Denied");
-    const refreshTokenMatches = await argon2.verify(
-      user.refreshToken,
-      refreshToken
+    const refreshTokenMatches = await bcrypt.compare(
+      refreshToken,
+      user.refreshToken
     );
     if (!refreshTokenMatches) throw new ForbiddenException("Access Denied");
     const tokens = await this.getTokens(user);
