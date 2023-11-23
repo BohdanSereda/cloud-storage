@@ -1,10 +1,11 @@
-import {Controller, Post, Body, Get, UseGuards} from "@nestjs/common";
+import {Controller, Post, Body, Get, UseGuards, Patch} from "@nestjs/common";
 import {UserService} from "./user.service";
 import {AddRoleDto, AuthTokenUserDto, CreateUserDto} from "./dto";
 import {AccessTokenGuard} from "src/common/guards";
 import {Roles} from "src/common/decorators";
 import {RolesGuard} from "src/common/guards";
 import {AuthUser} from "src/common/decorators";
+import {UpdateUserDto} from "./dto/update-user.dto";
 
 @Controller("user")
 export class UserController {
@@ -22,6 +23,15 @@ export class UserController {
     return await this.userService.getAll();
   }
 
+  @Patch()
+  @UseGuards(AccessTokenGuard)
+  async update(
+    @AuthUser() user: AuthTokenUserDto,
+    @Body() updateUserDto: UpdateUserDto
+  ) {
+    return this.userService.update(user.id, updateUserDto);
+  }
+
   @Get("/me")
   @Roles(["User"])
   @UseGuards(AccessTokenGuard, RolesGuard)
@@ -30,7 +40,7 @@ export class UserController {
   }
 
   @Post("/role")
-  @Roles(["User"])
+  @Roles(["Admin"])
   @UseGuards(AccessTokenGuard, RolesGuard)
   async addRole(@Body() addRoleDto: AddRoleDto) {
     return await this.userService.addRole(addRoleDto);
