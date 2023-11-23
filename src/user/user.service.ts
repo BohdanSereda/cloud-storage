@@ -4,6 +4,7 @@ import {Repository} from "typeorm";
 import {User} from "./entities";
 import {InjectRepository} from "@nestjs/typeorm";
 import {RolesService} from "src/roles/roles.service";
+import {UpdateUserDto} from "./dto/update-user.dto";
 
 @Injectable()
 export class UserService {
@@ -23,16 +24,15 @@ export class UserService {
       );
     }
 
-    const role = await this.roleService.getRoleByValue("User");
+    const role = await this.roleService.getByValue("User");
     const user = {...createUserDto, roles: [role]};
     return await this.userRepository.save(user);
   }
 
   async getAll() {
-    const users = await this.userRepository.find({
+    return await this.userRepository.find({
       relations: ["roles"],
     });
-    return users;
   }
 
   async getByEmail(email: string) {
@@ -45,18 +45,22 @@ export class UserService {
   }
 
   async getById(id: string) {
-    return await this.userRepository.findOne({
+    const user = await this.userRepository.findOne({
       where: {
         id,
       },
       relations: ["roles"],
     });
+    if (!user) {
+      throw new HttpException("User does not exist", HttpStatus.NOT_FOUND);
+    }
+    return user;
   }
 
   async addRole(addRoleDto: AddRoleDto) {
     const user = await this.getById(addRoleDto.userId);
-    const role = await this.roleService.getRoleByValue(addRoleDto.value);
-    if (role && user) {
+    const role = await this.roleService.getByValue(addRoleDto.value);
+    if (user && role) {
       user.roles.push(role);
       return await this.userRepository.save(user);
     }
@@ -65,5 +69,13 @@ export class UserService {
       "User or role does not exist",
       HttpStatus.NOT_FOUND
     );
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const toUpdate = await this.getById(id);
+    delete toUpdate.password;
+
+    const updated = Object.assign(toUpdate, updateUserDto);
+    return await this.userRepository.save(updated);
   }
 }

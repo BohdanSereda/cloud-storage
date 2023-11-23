@@ -1,10 +1,10 @@
 import {Controller, Post, Body, Get, UseGuards} from "@nestjs/common";
 import {UserService} from "./user.service";
-import {AddRoleDto, AuthUserDto, CreateUserDto} from "./dto";
-import {JwtAuthGuard} from "src/guards";
-import {Roles} from "src/auth/decorators";
-import {RolesGuard} from "src/guards";
-import {AuthUser} from "src/auth/decorators";
+import {AddRoleDto, AuthTokenUserDto, CreateUserDto} from "./dto";
+import {AccessTokenGuard} from "src/common/guards";
+import {Roles} from "src/common/decorators";
+import {RolesGuard} from "src/common/guards";
+import {AuthUser} from "src/common/decorators";
 
 @Controller("user")
 export class UserController {
@@ -17,21 +17,21 @@ export class UserController {
 
   @Get()
   @Roles(["User"])
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(AccessTokenGuard, RolesGuard)
   async getAll() {
     return await this.userService.getAll();
   }
 
   @Get("/me")
   @Roles(["User"])
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  async getMe(@AuthUser() user: AuthUserDto) {
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  async getMe(@AuthUser() user: AuthTokenUserDto) {
     return this.userService.getById(user.id);
   }
 
   @Post("/role")
   @Roles(["User"])
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(AccessTokenGuard, RolesGuard)
   async addRole(@Body() addRoleDto: AddRoleDto) {
     return await this.userService.addRole(addRoleDto);
   }

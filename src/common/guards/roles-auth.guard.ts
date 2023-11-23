@@ -9,13 +9,13 @@ import {
 import {Observable} from "rxjs";
 import {JwtService} from "@nestjs/jwt";
 import {REQUEST, Reflector} from "@nestjs/core";
-import {Roles} from "../auth/decorators/roles-auth.decorator";
+import {Roles} from "../decorators";
 import {Role} from "src/roles/entities";
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(
-    @Inject(REQUEST) private readonly request,
+    @Inject(REQUEST) private readonly request: any,
     private jwtService: JwtService,
     private reflector: Reflector
   ) {}
@@ -29,8 +29,8 @@ export class RolesGuard implements CanActivate {
       if (!roles) {
         return true;
       }
-      const authHeader = request.headers.authorization;
-      const token = authHeader.split(" ")[1];
+      const {authorization} = request.headers;
+      const token = authorization.split(" ")[1];
 
       const user = this.jwtService.verify(token);
       request.user = user;

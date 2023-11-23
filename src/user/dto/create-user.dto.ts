@@ -1,4 +1,4 @@
-import {IsEmail, IsNotEmpty, IsString} from "class-validator";
+import {IsDate, IsEmail, IsJWT, IsNotEmpty, IsString} from "class-validator";
 export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
@@ -8,4 +8,11 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   readonly password: string;
+
+  @IsString()
+  @IsJWT()
+  refreshToken?: string;
+
+  @IsDate()
+  last_logged_in?: Date;
 }
