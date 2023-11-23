@@ -1,7 +1,7 @@
 import {Module} from "@nestjs/common";
 import {UserModule} from "./user/user.module";
 import {AuthModule} from "./auth/auth.module";
-import {configuration} from "./common";
+import {configuration} from "./common/config";
 import {TypeOrmModule} from "@nestjs/typeorm";
 import {ConfigModule, ConfigService} from "@nestjs/config";
 import {RolesModule} from "./roles/roles.module";
