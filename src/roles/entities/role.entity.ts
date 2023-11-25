@@ -19,15 +19,20 @@ export class Role {
   @Column({nullable: false})
   description: string;
 
-  @CreateDateColumn({type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)"})
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP(6)",
+    name: "created_at",
+  })
   public created_at: Date;
 
   @UpdateDateColumn({
     type: "timestamp",
     default: () => "CURRENT_TIMESTAMP(6)",
     onUpdate: "CURRENT_TIMESTAMP(6)",
+    name: "updated_at",
   })
-  public updated_at: Date;
+  public updatedAt: Date;
 
   @ManyToMany(() => User, user => user.roles)
   users: User[];
