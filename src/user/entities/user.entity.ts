@@ -7,7 +7,9 @@ import {
   UpdateDateColumn,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from "typeorm";
+import {FileShares, StarredFiles} from "../../files/entities";
 
 @Entity()
 export class User {
@@ -19,32 +21,43 @@ export class User {
   @Column({nullable: false})
   password: string;
 
-  @Column({type: "int", default: 64})
-  storage_size: number;
+  @Column({type: "int", default: 64, name: "storage_size"})
+  storageSize: number;
 
   @Column({default: false})
   banned: boolean;
 
-  @Column({default: ""})
-  ban_reason: string;
+  @Column({default: "", name: "ban_reason"})
+  banReason: string;
 
-  @CreateDateColumn({type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)"})
-  created_at: Date;
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP(6)",
+    name: "created_at",
+  })
+  createdAt: Date;
 
   @UpdateDateColumn({
     type: "timestamp",
     default: () => "CURRENT_TIMESTAMP(6)",
     onUpdate: "CURRENT_TIMESTAMP(6)",
+    name: "updated_at",
   })
-  updated_at: Date;
+  updatedAt: Date;
 
-  @Column({type: "timestamp", nullable: true})
-  last_logged_in: Date;
+  @Column({type: "timestamp", nullable: true, name: "last_logged_in"})
+  lastLoggedIn: Date;
 
-  @Column({type: "varchar", nullable: true})
+  @Column({type: "varchar", nullable: true, name: "refresh_token"})
   refreshToken: string;
 
   @ManyToMany(() => Role, role => role.users)
   @JoinTable()
   roles: Role[];
+
+  @OneToMany(() => FileShares, fileShares => fileShares.user)
+  fileShares: FileShares[];
+
+  @OneToMany(() => StarredFiles, starredFiles => starredFiles.user)
+  starredFiles: StarredFiles[];
 }
